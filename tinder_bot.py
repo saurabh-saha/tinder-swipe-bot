@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 from time import sleep
-
+import random
 from secrets import username, password
 
 class TinderBot():
@@ -65,27 +65,34 @@ class TinderBot():
 
     def auto_swipe(self):
         while True:
-            sleep(0.5)
+            sleeptime = random.randrange(2, 40)/10
+            print('sleeping for',sleeptime)
+            sleep(sleeptime)
+
             try:
-                self.like()
+                if sleeptime <= 30:
+                    self.like()
+                else:
+                    self.dislike()
             except Exception:
+                print('Popups')
                 self.close_popup()
-                # try:
-                #     self.close_popup()
-                # except Exception:
-                #     self.close_match()
 
     def close_popup(self):
         try:
-            waittime_div = bot.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/div[2]/div[1]/div/div[1]/div/div/span/div/div/div[1]/div')
+            waittime_div = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/div[2]/div[1]/div/div[1]/div/div/span/div/div/div[1]/div')
             waitime = waittime_div.get_attribute('innerHTML')
             waitime = [int(i) for i in waitime.split(':')]
             mult = [3600, 60, 1]
             waitime = sum([i*j for i,j in zip(waitime, mult)])
+            print('Plus clicked. Sleeping for %d seconds.', waitime)
             sleep(waitime)
-            print('Plus clicked')
         except Exception:
             try:
+                pop_1 = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
+                pop_1.click()
+            except Exception:
+                print('time to add new popup?')
                 
     def close_match(self):
         match_popup = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/a')
@@ -96,3 +103,5 @@ class TinderBot():
 bot = TinderBot()
 print('final page')
 bot.login()
+while True:
+    bot.auto_swipe()
